@@ -1,41 +1,29 @@
-FROM ubuntu:trusty
+FROM node:8
 
-MAINTAINER Thibault Cohen <titilambert@gmail.com>
+ENV ADMIN_EMAIL admin@habitica.com
+ENV AMAZON_PAYMENTS_CLIENT_ID amzn1.application-oa2-client.68ed9e6904ef438fbc1bf86bf494056e
+ENV AMAZON_PAYMENTS_SELLER_ID AMQ3SB4SG5E91
+ENV AMPLITUDE_KEY e8d4c24b3d6ef3ee73eeba715023dd43
+ENV BASE_URL https://habitica.com
+ENV FACEBOOK_KEY 128307497299777
+ENV GA_ID UA-33510635-1
+ENV GOOGLE_CLIENT_ID 1035232791481-32vtplgnjnd1aufv3mcu1lthf31795fq.apps.googleusercontent.com
+ENV NODE_ENV production
+ENV STRIPE_PUB_KEY pk_85fQ0yMECHNfHTSsZoxZXlPSwSNfA
 
-ENV DEBIAN_FRONTEND noninteractive
+# Install global packages
+RUN npm install -g gulp-cli mocha
 
-### Init
+# Clone Habitica repo and install dependencies
+RUN mkdir -p /usr/src/habitrpg
+WORKDIR /usr/src/habitrpg
+RUN git clone --branch release https://github.com/HabitRPG/habitica.git /usr/src/habitrpg
+RUN npm install
+RUN gulp build:prod --force
 
-RUN apt-get update
+# Create Build dir
+RUN mkdir -p ./website/build
 
-### Utils
-
-RUN apt-get install -y git vim graphicsmagick nodejs phantomjs npm pkgconf libcairo2-dev libjpeg8-dev
-
-### Installation
-
-RUN cd /opt && git clone https://github.com/HabitRPG/habitrpg.git
-
-#RUN cd /opt/habitrpg && git checkout -t origin/develop
-
-RUN cd /opt/habitrpg && git pull
-
-RUN cd /opt/habitrpg && npm install -g grunt-cli bower nodemon
-
-RUN ln -s /usr/bin/nodejs /usr/bin/node
-
-RUN cd /opt/habitrpg && npm install
-
-# Add config file
-
-ADD ./config.json /opt/habitrpg/
-
-RUN mkdir -p /opt/habitrpg/build
-
-RUN cd /opt/habitrpg && bower install --allow-root
-
-# Run server
-
-RUN cd /opt/habitrpg && grunt build:prod 
-
-CMD cd /opt/habitrpg && grunt nodemon
+# Start Habitica
+EXPOSE 3000
+CMD ["node", "./website/transpiled-babel/index.js"]

@@ -1,0 +1,8 @@
+{
+  "noItemsAvailableForType": "你沒有<%= type %>。",
+  "foodItemType": "食物",
+  "eggsItemType": "蛋",
+  "hatchingPotionsItemType": "孵化藥劑",
+  "specialItemType": "特殊物品",
+  "lockedItem": "未解鎖物品"
+}
